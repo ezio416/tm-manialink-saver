@@ -1,15 +1,21 @@
 // c 2024-02-02
 // m 2024-02-03
 
-const string folderEditor     = "CSmEditorPluginMapType/";
-const string folderMenu       = "MenuCustom_CurrentManiaApp/";
-const string folderPlayground = "CGameManiaAppPlayground/";
+const string folderEditor     = "editor_CSmEditorPluginMapType/";
+const string folderMenu       = "menu_CGameManiaAppTitle/";
+const string folderPlayground = "playground_CGameManiaAppPlayground/";
 bool         saving           = false;
 const float  scale            = UI::GetScale();
 const string title            = "\\$FF2" + Icons::Link + "\\$G ManiaLink Saver";
 
 [Setting category="General" name="Show window"]
 bool S_Show = true;
+
+[Setting category="General" name="Show/hide with game UI"]
+bool S_HideWithGame = true;
+
+[Setting category="General" name="Show/hide with Openplanet UI"]
+bool S_HideWithOP = true;
 
 void Main() {
     IO::CreateFolder(IO::FromStorageFolder(folderEditor));
@@ -27,7 +33,11 @@ void RenderMenu() {
 }
 
 void Render() {
-    if (!S_Show)
+    if (
+        !S_Show ||
+        (S_HideWithGame && !UI::IsGameUIVisible()) ||
+        (S_HideWithOP && !UI::IsOverlayShown())
+    )
         return;
 
     CTrackMania@ App = cast<CTrackMania@>(GetApp());
