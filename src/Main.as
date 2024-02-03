@@ -49,6 +49,9 @@ void Render() {
     UI::Begin(title, S_Show, UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoCollapse);
         vec2 buttonSize = vec2(scale * 250.0f, scale * 30.0f);
 
+        if (UI::Button(Icons::ExternalLink + " Open folder", buttonSize))
+            OpenExplorerPath(IO::FromStorageFolder(""));
+
         UI::BeginDisabled(saving);
             if (UI::Button(Icons::FloppyO + " Save ManiaLinks from main menu", buttonSize))
                 startnew(SaveMenu);
