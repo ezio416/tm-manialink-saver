@@ -36,7 +36,7 @@ void Render() {
 
     UI::Begin(title, S_Show, UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoCollapse);
         UI::BeginDisabled(saving);
-            if (UI::Button(Icons::FloppyO + " Save ManiaLinks from menu", vec2(scale * 250.0f, scale * 30.0f)))
+            if (UI::Button(Icons::FloppyO + " Save ManiaLinks from main menu", vec2(scale * 250.0f, scale * 30.0f)))
                 startnew(SaveMenu);
 
             UI::BeginDisabled(Network.ClientManiaAppPlayground is null);
