@@ -1,6 +1,7 @@
 // c 2024-02-02
 // m 2024-02-03
 
+const string folderEditor     = "CSmEditorPluginMapType/";
 const string folderMenu       = "MenuCustom_CurrentManiaApp/";
 const string folderPlayground = "CGameManiaAppPlayground/";
 bool         saving           = false;
@@ -11,6 +12,7 @@ const string title            = "\\$FF2" + Icons::Link + "\\$G ManiaLink Saver";
 bool S_Show = true;
 
 void Main() {
+    IO::CreateFolder(IO::FromStorageFolder(folderEditor));
     IO::CreateFolder(IO::FromStorageFolder(folderMenu));
     IO::CreateFolder(IO::FromStorageFolder(folderPlayground));
 
@@ -35,13 +37,20 @@ void Render() {
         return;
 
     UI::Begin(title, S_Show, UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoCollapse);
+        vec2 buttonSize = vec2(scale * 250.0f, scale * 30.0f);
+
         UI::BeginDisabled(saving);
-            if (UI::Button(Icons::FloppyO + " Save ManiaLinks from main menu", vec2(scale * 250.0f, scale * 30.0f)))
+            if (UI::Button(Icons::FloppyO + " Save ManiaLinks from main menu", buttonSize))
                 startnew(SaveMenu);
 
             UI::BeginDisabled(Network.ClientManiaAppPlayground is null);
-                if (UI::Button(Icons::FloppyO + " Save ManiaLinks from playground", vec2(scale * 250.0f, scale * 30.0f)))
+                if (UI::Button(Icons::FloppyO + " Save ManiaLinks from playground", buttonSize))
                     startnew(SavePlayground);
+            UI::EndDisabled();
+
+            UI::BeginDisabled(App.Editor is null);
+                if (UI::Button(Icons::FloppyO + " Save ManiaLinks from editor", buttonSize))
+                    startnew(SaveEditor);
             UI::EndDisabled();
         UI::EndDisabled();
     UI::End();
@@ -84,6 +93,8 @@ void SaveMenu() {
             yield();
         }
     }
+
+    saving = false;
 }
 
 void SavePlayground() {
@@ -117,6 +128,47 @@ void SavePlayground() {
             string name = GoodFileName(header.SubStr(17, header.Length - 19));
 
             IO::File file(IO::FromStorageFolder(folderPlayground + name + ".xml"), IO::FileMode::Write);
+            file.Write(page);
+            file.Close();
+
+            yield();
+        }
+    }
+
+    saving = false;
+}
+
+void SaveEditor() {
+    if (saving)
+        return;
+
+    CTrackMania@ App = cast<CTrackMania@>(GetApp());
+
+    CGameCtnEditorFree@ Editor = cast<CGameCtnEditorFree@>(App.Editor);
+    if (Editor is null)
+        return;
+
+    CSmEditorPluginMapType@ Type = cast<CSmEditorPluginMapType@>(Editor.PluginMapType);
+    if (Type is null || Type.UILayers.Length == 0)
+        return;
+
+    saving = true;
+
+    for (uint i = 0; i < Type.UILayers.Length; i++) {
+        CGameUILayer@ Layer = Type.UILayers[i];
+        if (Layer is null)
+            continue;
+
+        string page = string(Layer.ManialinkPage);
+
+        int start = page.IndexOf("<");
+        int end = page.IndexOf(">");
+
+        if (start > -1 && end > -1) {
+            string header = page.SubStr(start, end + 1 - start).Replace(" version=\"3\"", "");
+            string name = GoodFileName(header.SubStr(17, header.Length - 19));
+
+            IO::File file(IO::FromStorageFolder(folderEditor + name + ".xml"), IO::FileMode::Write);
             file.Write(page);
             file.Close();
 
